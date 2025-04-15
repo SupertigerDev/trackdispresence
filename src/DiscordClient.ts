@@ -15,6 +15,7 @@ interface FormattedActivity {
   state: string | null;
   syncId: string | null;
   url?: string | null;
+  type: number
   assets?: {
     largeText?: string | null;
     smallText?: string | null;
@@ -51,6 +52,7 @@ export const createDiscordClient = (token: string, guildId: string) => {
             url: a.url,
             details: a.details,
             syncId: a.syncId,
+            type: a.type,
             state: a.state,
             assets: a.assets,
             createdTimestamp: a.createdTimestamp,
