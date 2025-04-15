@@ -16,9 +16,9 @@ interface FormattedActivity {
   syncId: string | null;
   url?: string | null;
   type: number
-  largeImageUrl?: string | null;
-  smallImageUrl?: string | null;
   assets?: {
+    largeImageUrl?: string | null;
+    smallImageUrl?: string | null;
     largeText?: string | null;
     smallText?: string | null;
     largeImage?: string | null;
@@ -34,32 +34,32 @@ interface FormattedActivity {
 
 export const createDiscordClient = (token: string, guildId: string) => {
   const events = {
-    presenceUpdate: (userId: string, presence: FormattedPresence) => {},
-    ready: () => {},
+    presenceUpdate: (userId: string, presence: FormattedPresence) => { },
+    ready: () => { },
   };
 
-  const formatPresence = (rawPresence?: any, presence: Presence | undefined) => {
+  const formatPresence = (rawPresence: any, presence: Presence | undefined) => {
     if (!rawPresence) return;
     if (typeof rawPresence !== "object") return;
     return {
       status: rawPresence.status,
       activities: rawPresence.activities.map(
         (a, i) =>
-          ({
-            name: a.name,
-            timestamps: a.timestamps,
-            url: a.url,
-            details: a.details,
-            syncId: a.syncId,
-            type: a.type,
-            state: a.state,
-            assets: {
-              ...a.assets,
-              largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
-              smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
-            },
-            createdTimestamp: a.createdTimestamp,
-          } as FormattedActivity)
+        ({
+          name: a.name,
+          timestamps: a.timestamps,
+          url: a.url,
+          details: a.details,
+          syncId: a.syncId,
+          type: a.type,
+          state: a.state,
+          assets: {
+            ...a.assets,
+            largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
+            smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
+          },
+          createdTimestamp: a.createdTimestamp,
+        } as FormattedActivity)
       ),
     } as FormattedPresence;
   };
