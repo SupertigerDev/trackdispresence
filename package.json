@@ -1,0 +1,9 @@
+{
+  "name": "track-dis-presence",
+  "dependencies": {
+    "discord-api-types": "^0.37.120",
+    "discord.js": "^14.18.0",
+    "elysia": "^1.2.25",
+    "elysia-rate-limit": "^4.3.0"
+  }
+}
