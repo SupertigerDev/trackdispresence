@@ -24,7 +24,7 @@ discordClient.events.presenceUpdate = (userId, data) => {
 const MemberNotInGuildErrorMessage =
   "This member is not in the Discord RPC Tracker guild. Join https://discord.gg/ggrd2wr4pe and try again.";
 
-app.ws("/users/:userId/presences", {
+app.ws("/trackdispresence/:userId", {
   open: (ws) => {
     const userId = ws.data.params.userId;
     const presence = discordClient.getUserPresence(userId);
@@ -38,7 +38,7 @@ app.ws("/users/:userId/presences", {
   },
 });
 
-app.get("/users/:userId/presences", async ({ params, set }) => {
+app.get("/trackdispresence/:userId", async ({ params, set }) => {
   const userId = params.userId;
 
   const presence = discordClient.getUserPresence(userId);
