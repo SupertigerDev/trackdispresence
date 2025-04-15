@@ -36,13 +36,13 @@ export const createDiscordClient = (token: string, guildId: string) => {
     ready: () => {},
   };
 
-  const formatPresence = (presence?: any) => {
-    if (!presence) return;
-    if (typeof presence !== "object") return;
+  const formatPresence = (rawPresence?: any, presence: Presence | undefined) => {
+    if (!rawPresence) return;
+    if (typeof rawPresence !== "object") return;
     return {
-      status: presence.status,
-      activities: presence.activities.map(
-        (a) =>
+      status: rawPresence.status,
+      activities: rawPresence.activities.map(
+        (a, i) =>
           ({
             name: a.name,
             timestamps: a.timestamps,
@@ -51,7 +51,11 @@ export const createDiscordClient = (token: string, guildId: string) => {
             syncId: a.syncId,
             type: a.type,
             state: a.state,
-            assets: a.assets,
+            assets: {
+              ...a.assets,
+              largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
+              smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
+            },
             createdTimestamp: a.createdTimestamp,
           } as FormattedActivity)
       ),
@@ -85,7 +89,8 @@ export const createDiscordClient = (token: string, guildId: string) => {
     const member = client.guilds.cache.get(guildId)?.members.cache.get(userId);
     if (!member) return "MEMBER_NOT_IN_GUILD";
     return formatPresence(
-      member?.presence?.toJSON() || { status: "offline", activities: [] }
+      member?.presence?.toJSON() || { status: "offline", activities: [] },
+      member?.presence
     );
   };
 
