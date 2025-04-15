@@ -28,10 +28,7 @@ interface FormattedActivity {
   } | null;
 }
 
-const cleanEmpty = <T extends Record<string, any>>(obj: T) =>
-  Object.entries(obj)
-    .map(([k, v]) => [k, v && typeof v === "object" ? cleanEmpty(v) : v])
-    .reduce((a, [k, v]) => (v == null ? a : ((a[k] = v), a)), {});
+
 
 export const createDiscordClient = (token: string, guildId: string) => {
   const events = {
@@ -42,7 +39,7 @@ export const createDiscordClient = (token: string, guildId: string) => {
   const formatPresence = (presence?: any) => {
     if (!presence) return;
     if (typeof presence !== "object") return;
-    return cleanEmpty({
+    return {
       status: presence.status,
       activities: presence.activities.map(
         (a) =>
@@ -58,7 +55,7 @@ export const createDiscordClient = (token: string, guildId: string) => {
             createdTimestamp: a.createdTimestamp,
           } as FormattedActivity)
       ),
-    }) as FormattedPresence;
+    } as FormattedPresence;
   };
 
   const client = new Client({
