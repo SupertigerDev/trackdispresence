@@ -16,6 +16,8 @@ interface FormattedActivity {
   syncId: string | null;
   url?: string | null;
   type: number
+  largeImageUrl?: string | null;
+  smallImageUrl?: string | null;
   assets?: {
     largeText?: string | null;
     smallText?: string | null;
