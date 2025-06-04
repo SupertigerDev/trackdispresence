@@ -5,5 +5,8 @@
     "discord.js": "^14.18.0",
     "elysia": "^1.2.25",
     "elysia-rate-limit": "^4.3.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.2.15"
   }
 }

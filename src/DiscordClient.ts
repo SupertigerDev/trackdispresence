@@ -3,6 +3,7 @@ import {
   GatewayDispatchPayload,
   GatewayDispatchEvents,
 } from "discord-api-types/v9";
+import { getDetectable } from "./database";
 
 interface FormattedPresence {
   status: string;
@@ -44,22 +45,35 @@ export const createDiscordClient = (token: string, guildId: string) => {
     return {
       status: rawPresence.status,
       activities: rawPresence.activities.map(
-        (a, i) =>
-        ({
-          name: a.name,
-          timestamps: a.timestamps,
-          url: a.url,
-          details: a.details,
-          syncId: a.syncId,
-          type: a.type,
-          state: a.state,
-          assets: {
-            ...a.assets,
-            largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
-            smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
-          },
-          createdTimestamp: a.createdTimestamp,
-        } as FormattedActivity)
+        (a, i) => {
+          
+          const activity = {
+            name: a.name,
+            timestamps: a.timestamps,
+            url: a.url,
+            details: a.details,
+            syncId: a.syncId,
+            type: a.type,
+            state: a.state,
+            assets: {
+              ...a.assets,
+              largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
+              smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
+            },
+            createdTimestamp: a.createdTimestamp,
+          } as FormattedActivity
+
+          if (!activity.assets?.largeImage && !activity.assets?.smallImage) {
+            const detectable = getDetectable(activity.name);
+            if (detectable) {
+              activity.assets = {
+                largeImageUrl: `https://cdn.discordapp.com/app-icons/${detectable.id}/${detectable.icon}.png?size=240`,
+              };
+            }
+          }
+
+          return activity
+        }
       ),
     } as FormattedPresence;
   };
