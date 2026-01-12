@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { DISCORD_TOKEN, GUILD_ID, PORT } from "./env";
 import { createDiscordClient } from "./DiscordClient";
 import { rateLimit } from "elysia-rate-limit";
+import cors from "@elysiajs/cors";
 
 const app = new Elysia().use(
   rateLimit({
@@ -53,7 +54,7 @@ app.get("/trackdispresence/:userId", async ({ params, set }) => {
 });
 
 discordClient.events.ready = () => {
-  app.listen(PORT, () => {
+  app.use(cors()).listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 };
