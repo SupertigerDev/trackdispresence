@@ -1,9 +1,15 @@
-import { Client, Events, GatewayIntentBits, Presence } from "discord.js";
 import {
-  GatewayDispatchPayload,
+  Activity,
+  Client,
+  Events,
+  GatewayIntentBits,
+  Presence,
+} from "discord.js";
+import {
   GatewayDispatchEvents,
+  type GatewayDispatchPayload,
 } from "discord-api-types/v9";
-import { getDetectable } from "./database";
+import { getDetectableById, getDetectableByName } from "./database";
 
 interface FormattedPresence {
   status: string;
@@ -16,7 +22,8 @@ interface FormattedActivity {
   state: string | null;
   syncId: string | null;
   url?: string | null;
-  type: number
+  type: number;
+  applicationId?: string | null;
   assets?: {
     largeImageUrl?: string | null;
     smallImageUrl?: string | null;
@@ -31,12 +38,10 @@ interface FormattedActivity {
   } | null;
 }
 
-
-
 export const createDiscordClient = (token: string, guildId: string) => {
   const events = {
-    presenceUpdate: (userId: string, presence: FormattedPresence) => { },
-    ready: () => { },
+    presenceUpdate: (userId: string, presence: FormattedPresence) => {},
+    ready: () => {},
   };
 
   const formatPresence = (rawPresence: any, presence: Presence | undefined) => {
@@ -44,37 +49,37 @@ export const createDiscordClient = (token: string, guildId: string) => {
     if (typeof rawPresence !== "object") return;
     return {
       status: rawPresence.status,
-      activities: rawPresence.activities.map(
-        (a, i) => {
-          
-          const activity = {
-            name: a.name,
-            timestamps: a.timestamps,
-            url: a.url,
-            details: a.details,
-            syncId: a.syncId,
-            type: a.type,
-            state: a.state,
-            assets: {
-              ...a.assets,
-              largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
-              smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
-            },
-            createdTimestamp: a.createdTimestamp,
-          } as FormattedActivity
+      activities: (rawPresence.activities as Activity[]).map((a, i) => {
+        const activity = {
+          name: a.name,
+          timestamps: a.timestamps,
+          applicationId: a.applicationId,
+          url: a.url,
+          details: a.details,
+          syncId: a.syncId,
+          type: a.type,
+          state: a.state,
+          assets: {
+            ...a.assets,
+            largeImageUrl: presence?.activities[i]?.assets?.largeImageURL(),
+            smallImageUrl: presence?.activities[i]?.assets?.smallImageURL(),
+          },
+          createdTimestamp: a.createdTimestamp,
+        } as FormattedActivity;
 
-          if (!activity.assets?.largeImage && !activity.assets?.smallImage) {
-            const detectable = getDetectable(activity.name);
-            if (detectable) {
-              activity.assets = {
-                largeImageUrl: `https://cdn.discordapp.com/app-icons/${detectable.id}/${detectable.icon}.png?size=240`,
-              };
-            }
+        if (!activity.assets?.largeImage && !activity.assets?.smallImage) {
+          const detectable =
+            getDetectableById(activity.applicationId) ||
+            getDetectableByName(activity.name);
+          if (detectable) {
+            activity.assets = {
+              largeImageUrl: `https://cdn.discordapp.com/app-icons/${detectable.id}/${detectable.icon}.png?size=240`,
+            };
           }
-
-          return activity
         }
-      ),
+
+        return activity;
+      }),
     } as FormattedPresence;
   };
 
@@ -93,7 +98,7 @@ export const createDiscordClient = (token: string, guildId: string) => {
       process.nextTick(() => {
         events.presenceUpdate(
           payload.d.user.id,
-          getUserPresence(payload.d.user.id) as FormattedPresence
+          getUserPresence(payload.d.user.id) as FormattedPresence,
         );
       });
     }
@@ -106,7 +111,7 @@ export const createDiscordClient = (token: string, guildId: string) => {
     if (!member) return "MEMBER_NOT_IN_GUILD";
     return formatPresence(
       member?.presence?.toJSON() || { status: "offline", activities: [] },
-      member?.presence
+      member?.presence!,
     );
   };
 

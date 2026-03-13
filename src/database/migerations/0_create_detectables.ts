@@ -1,9 +1,11 @@
 import { db } from "..";
 
-db.query(`
+db.query(
+  `
     CREATE TABLE detectables (
-        name TEXT NOT NULL PRIMARY KEY,
-        id TEXT NOT NULL,
+        id TEXT NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL,
         icon TEXT NOT NULL
     );
-`).run();
+`,
+).run();
